@@ -1,0 +1,15 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "name", "category", "price", "stock", "description"],
+    "properties": {
+      "id": { "type": "integer" },
+      "name": { "type": "string" },
+      "category": { "type": "string" },
+      "price": { "type": "number", "minimum": 0 },
+      "stock": { "type": "integer", "minimum": 0 },
+      "description": { "type": "string" }
+    }
+  }
+}

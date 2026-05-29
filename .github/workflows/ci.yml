@@ -1,0 +1,78 @@
+name: CI - Automated Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-api-${{ hashFiles('**/requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r ecom_app/requirements.txt
+          pip install -r automation_tests/requirements.txt
+
+      - name: Run API tests
+        working-directory: automation_tests
+        run: |
+          mkdir -p reports/allure-results
+          pytest api/ -m api
+
+      - name: Upload pytest HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-pytest-report
+          path: automation_tests/reports/report.html
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-allure-results
+          path: automation_tests/reports/allure-results
+
+  ui-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r ecom_app/requirements.txt
+          pip install -r automation_tests/requirements.txt
+          playwright install --with-deps chromium
+
+      - name: Run UI tests
+        working-directory: automation_tests
+        run: |
+          mkdir -p reports/allure-results
+          pytest ui/ -m ui
+
+      - name: Upload UI reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-allure-results
+          path: automation_tests/reports/allure-results

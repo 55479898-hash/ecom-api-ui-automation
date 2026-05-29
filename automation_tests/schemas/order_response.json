@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "required": ["id", "user_id", "total_amount", "status", "created_at", "items"],
+  "properties": {
+    "id": { "type": "integer" },
+    "user_id": { "type": "integer" },
+    "total_amount": { "type": "number" },
+    "discount_amount": { "type": "number" },
+    "status": { "type": "string" },
+    "created_at": { "type": "string" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["product_id", "product_name", "quantity", "unit_price"],
+        "properties": {
+          "product_id": { "type": "integer" },
+          "product_name": { "type": "string" },
+          "quantity": { "type": "integer", "minimum": 1 },
+          "unit_price": { "type": "number" }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

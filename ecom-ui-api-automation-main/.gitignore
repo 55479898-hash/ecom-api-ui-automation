@@ -1,0 +1,19 @@
+# IDE / OS
+.idea/
+.vscode/
+
+# Python / Playwright caches
+.venv/
+__pycache__/
+.pytest_cache/
+.playwright/
+test-results/
+*.log
+.env
+
+# Test artifacts
+reports/
+
+# Secrets
+playwright_ecom-ui-api/data/credentials.json
+!playwright_ecom-ui-api/data/credentials_negative.json

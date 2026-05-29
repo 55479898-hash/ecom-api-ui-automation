@@ -1,0 +1,90 @@
+name: tests
+on: [push, pull_request]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      HEADLESS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt
+      - run: python -m playwright install --with-deps
+
+      - name: Create credentials.json from secrets
+        shell: bash
+        env:
+          USER_EMAIL: ${{ secrets.USER_EMAIL }}
+          USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
+          ALT_USER_EMAIL: ${{ secrets.ALT_USER_EMAIL }}
+          ALT_USER_PASSWORD: ${{ secrets.ALT_USER_PASSWORD }}
+        run: |
+          python - <<'PY'
+          import os, json, pathlib
+          d = pathlib.Path("playwright_ecom-ui-api") / "data"
+          d.mkdir(parents=True, exist_ok=True)
+
+    
+          valid1 = {
+            "case": "valid-1",
+            "userEmail": os.environ["USER_EMAIL"],
+            "userPassword": os.environ["USER_PASSWORD"],
+            "expected": 200
+          }
+          valid2 = {
+            "case": "valid-2",
+            "userEmail": os.environ.get("ALT_USER_EMAIL", os.environ["USER_EMAIL"]),
+            "userPassword": os.environ.get("ALT_USER_PASSWORD", os.environ["USER_PASSWORD"]),
+            "expected": 200
+          }
+
+          with open(d/"credentials.json", "w", encoding="utf-8") as f:
+            json.dump({"user_credentials": [valid1, valid2]}, f, indent=2)
+          PY
+
+
+      - name: Run tests (fresh reports)
+        shell: bash
+        run: |
+          rm -rf reports || true
+          mkdir -p reports/videos
+          set -o pipefail
+          pytest -rA -vv \
+            --html=reports/index.html --self-contained-html \
+            2>&1 | tee reports/pytest.log
+
+      - name: Upload Pages artifact (report)
+        if: always()
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: reports
+          name: github-pages
+
+      - name: Upload raw artifact (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-raw
+          path: reports/
+
+  deploy:
+    needs: run
+    if: always()
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages

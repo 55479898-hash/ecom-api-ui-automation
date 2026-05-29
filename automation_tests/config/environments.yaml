@@ -1,0 +1,15 @@
+default: test
+
+environments:
+  test:
+    base_url: "http://127.0.0.1:8000"
+    db_type: sqlite
+    db_path: "../ecom_app/ecom.db"
+  staging:
+    base_url: "http://staging.example.com"
+    db_type: mysql
+    db_host: "127.0.0.1"
+    db_port: 3306
+    db_user: "test"
+    db_password: "test"
+    db_name: "ecom_test"
