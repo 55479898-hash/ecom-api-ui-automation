@@ -1,0 +1,23 @@
+[
+  {
+    "case_id": "payment_failed_status",
+    "steps": [
+      {"action": "add_cart", "product_id": 8, "quantity": 1},
+      {"action": "create_order", "save_as": "order"},
+      {"action": "pay_callback", "payment_status": "failed"}
+    ],
+    "expected_status": 200,
+    "expected_order_status": "payment_failed"
+  },
+  {
+    "case_id": "payment_on_cancelled_order",
+    "steps": [
+      {"action": "add_cart", "product_id": 8, "quantity": 1},
+      {"action": "create_order", "save_as": "order"},
+      {"action": "cancel_order", "order_ref": "$order"},
+      {"action": "pay_callback", "payment_status": "success"}
+    ],
+    "expected_status": 400,
+    "expected_error_code": "ORDER_CANCELLED"
+  }
+]

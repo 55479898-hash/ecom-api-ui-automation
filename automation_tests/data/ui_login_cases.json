@@ -1,0 +1,25 @@
+[
+  {
+    "case_id": "login_success",
+    "flow": "login",
+    "username": "alice",
+    "password": "password123",
+    "expect_url_contains": "/products",
+    "expect_visible": ["products-title", "user-info"],
+    "expect_text": {"user-info": "alice"}
+  },
+  {
+    "case_id": "login_failure",
+    "flow": "login",
+    "username": "alice",
+    "password": "wrongpassword",
+    "expect_visible": ["login-error"],
+    "expect_text": {"login-error": "Invalid username or password"}
+  },
+  {
+    "case_id": "unauthenticated_redirect",
+    "flow": "redirect",
+    "goto_path": "/cart",
+    "expect_url_contains": "/login"
+  }
+]

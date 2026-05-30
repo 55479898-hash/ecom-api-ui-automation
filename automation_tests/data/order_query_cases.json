@@ -1,0 +1,14 @@
+[
+  {
+    "case_id": "invalid_order_id_zero",
+    "order_id": 0,
+    "expected_statuses": [400, 404],
+    "expected_error_code": "INVALID_ORDER_ID"
+  },
+  {
+    "case_id": "invalid_order_id_not_found",
+    "order_id": 99999,
+    "expected_statuses": [400, 404],
+    "expected_error_code": "ORDER_NOT_FOUND"
+  }
+]

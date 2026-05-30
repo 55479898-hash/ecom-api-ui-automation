@@ -1,0 +1,113 @@
+[
+  {
+    "case_id": "all_products",
+    "params": {},
+    "expected_status": 200,
+    "assertions": [{"type": "list_length", "equals": 10}]
+  },
+  {
+    "case_id": "search_iphone",
+    "params": {"q": "iPhone"},
+    "expected_status": 200,
+    "assertions": [
+      {"type": "list_min_length", "min": 1},
+      {"type": "any_field_contains", "field": "name", "contains": "iPhone"}
+    ]
+  },
+  {
+    "case_id": "search_book",
+    "params": {"q": "Python"},
+    "expected_status": 200,
+    "assertions": [{"type": "list_min_length", "min": 1}]
+  },
+  {
+    "case_id": "search_no_result",
+    "params": {"q": "zzzznotexist"},
+    "expected_status": 200,
+    "assertions": [{"type": "list_length", "equals": 0}]
+  },
+  {
+    "case_id": "filter_electronics",
+    "params": {"category": "electronics"},
+    "expected_status": 200,
+    "assertions": [{"type": "all_field_equals", "field": "category", "value": "electronics"}]
+  },
+  {
+    "case_id": "filter_clothing",
+    "params": {"category": "clothing"},
+    "expected_status": 200,
+    "assertions": [{"type": "all_field_equals", "field": "category", "value": "clothing"}]
+  },
+  {
+    "case_id": "filter_books",
+    "params": {"category": "books"},
+    "expected_status": 200,
+    "assertions": [{"type": "all_field_equals", "field": "category", "value": "books"}]
+  },
+  {
+    "case_id": "filter_home",
+    "params": {"category": "home"},
+    "expected_status": 200,
+    "assertions": [{"type": "all_field_equals", "field": "category", "value": "home"}]
+  },
+  {
+    "case_id": "price_min_500",
+    "params": {"min_price": 500},
+    "expected_status": 200,
+    "assertions": [{"type": "all_field_gte", "field": "price", "value": 500}]
+  },
+  {
+    "case_id": "price_max_100",
+    "params": {"max_price": 100},
+    "expected_status": 200,
+    "assertions": [{"type": "all_field_lte", "field": "price", "value": 100}]
+  },
+  {
+    "case_id": "price_range",
+    "params": {"min_price": 100, "max_price": 1000},
+    "expected_status": 200,
+    "assertions": [{"type": "all_field_between", "field": "price", "min": 100, "max": 1000}]
+  },
+  {
+    "case_id": "combined_search",
+    "params": {"q": "Air", "category": "electronics"},
+    "expected_status": 200,
+    "assertions": [{"type": "all_field_equals", "field": "category", "value": "electronics"}]
+  },
+  {
+    "case_id": "invalid_price_range",
+    "params": {"min_price": 1000, "max_price": 100},
+    "expected_status": 400,
+    "assertions": null
+  },
+  {
+    "case_id": "negative_min_price",
+    "params": {"min_price": -1},
+    "expected_status": 422,
+    "assertions": null
+  },
+  {
+    "case_id": "zero_max_price",
+    "params": {"max_price": 0},
+    "expected_status": 200,
+    "assertions": [{"type": "all_field_lte", "field": "price", "value": 0}]
+  },
+  {
+    "case_id": "empty_query",
+    "params": {"q": ""},
+    "expected_status": 200,
+    "assertions": [{"type": "list_length", "equals": 10}]
+  },
+  {
+    "case_id": "special_char_query",
+    "params": {"q": "%_"},
+    "expected_status": 200,
+    "assertions": [{"type": "is_list"}]
+  },
+  {
+    "case_id": "uppercase_category",
+    "params": {"category": "ELECTRONICS"},
+    "expected_status": 200,
+    "assertions": [{"type": "all_field_equals", "field": "category", "value": "electronics"}]
+  }
+]

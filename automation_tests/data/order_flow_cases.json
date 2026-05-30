@@ -1,0 +1,50 @@
+[
+  {
+    "case_id": "create_order_pending",
+    "steps": [
+      {"action": "add_cart", "product_id": 8, "quantity": 1},
+      {"action": "create_order", "save_as": "order"}
+    ],
+    "assertions": [
+      {"type": "response_json_field", "field": "status", "equals": "pending", "on": "order"},
+      {"type": "order_status", "equals": "pending"}
+    ]
+  },
+  {
+    "case_id": "payment_callback_success",
+    "steps": [
+      {"action": "add_cart", "product_id": 8, "quantity": 1},
+      {"action": "create_order", "save_as": "order"},
+      {"action": "pay_callback", "payment_status": "success"}
+    ],
+    "snapshot_stock": 8,
+    "assertions": [
+      {"type": "response_status", "equals": 200},
+      {"type": "response_json_field", "field": "status", "equals": "paid"},
+      {"type": "order_status", "equals": "paid"},
+      {"type": "stock_delta", "product_id": 8, "delta": -1}
+    ]
+  },
+  {
+    "case_id": "duplicate_payment_callback",
+    "steps": [
+      {"action": "add_cart", "product_id": 8, "quantity": 1},
+      {"action": "create_order", "save_as": "order"},
+      {"action": "pay_callback", "payment_status": "success", "save_txn": true},
+      {"action": "pay_callback", "payment_status": "success", "transaction_id": "$transaction_id"}
+    ],
+    "expected_status": 400,
+    "expected_error_code": "DUPLICATE_PAYMENT"
+  },
+  {
+    "case_id": "cancel_pending_order",
+    "steps": [
+      {"action": "add_cart", "product_id": 8, "quantity": 1},
+      {"action": "create_order", "save_as": "order"},
+      {"action": "cancel_order", "order_ref": "$order"}
+    ],
+    "assertions": [
+      {"type": "order_status", "equals": "cancelled"}
+    ]
+  }
+]

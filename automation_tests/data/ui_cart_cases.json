@@ -1,0 +1,38 @@
+[
+  {
+    "case_id": "add_to_cart_and_checkout",
+    "requires_login": true,
+    "actions": [
+      {"type": "fill", "test_id": "search-input", "value": "Python"},
+      {"type": "click", "test_id": "filter-btn"},
+      {"type": "wait_products"},
+      {"type": "click", "test_id": "add-cart-btn-7"},
+      {"type": "expect_visible", "test_id": "toast"},
+      {"type": "click", "test_id": "nav-cart"},
+      {"type": "wait_url_contains", "value": "/cart"},
+      {"type": "expect_visible", "test_id": "cart-item-7"},
+      {"type": "click", "test_id": "checkout-btn"},
+      {"type": "wait_url_contains", "value": "/orders", "timeout": 15000},
+      {"type": "expect_visible", "test_id": "orders-title"}
+    ],
+    "expect_first_order_status": "paid"
+  },
+  {
+    "case_id": "cart_badge_updates",
+    "requires_login": true,
+    "actions": [
+      {"type": "click", "test_id": "add-cart-btn-3"},
+      {"type": "sleep_ms", "value": 500}
+    ],
+    "expect_badge_not": "0"
+  },
+  {
+    "case_id": "empty_cart_message",
+    "login": {"username": "bob", "password": "password456"},
+    "actions": [
+      {"type": "click", "test_id": "nav-cart"},
+      {"type": "wait_url_contains", "value": "/cart"}
+    ],
+    "expect_visible": ["empty-cart-msg"]
+  }
+]

@@ -1,0 +1,156 @@
+[
+  {
+    "case_id": "valid_alice",
+    "payload": {"username": "alice", "password": "password123"},
+    "expected_status": 200,
+    "expect_success": true,
+    "msg_fragment": "Login successful"
+  },
+  {
+    "case_id": "valid_bob",
+    "payload": {"username": "bob", "password": "password456"},
+    "expected_status": 200,
+    "expect_success": true,
+    "msg_fragment": "Login successful"
+  },
+  {
+    "case_id": "valid_testuser",
+    "payload": {"username": "testuser", "password": "test1234"},
+    "expected_status": 200,
+    "expect_success": true,
+    "msg_fragment": "Login successful"
+  },
+  {
+    "case_id": "wrong_password",
+    "payload": {"username": "alice", "password": "wrongpass"},
+    "expected_status": 401,
+    "expect_success": false,
+    "msg_fragment": "Invalid username or password"
+  },
+  {
+    "case_id": "wrong_username",
+    "payload": {"username": "nonexistent", "password": "password123"},
+    "expected_status": 401,
+    "expect_success": false,
+    "msg_fragment": "Invalid username or password"
+  },
+  {
+    "case_id": "empty_username",
+    "payload": {"username": "", "password": "password123"},
+    "expected_status": 422,
+    "expect_success": false,
+    "msg_fragment": null
+  },
+  {
+    "case_id": "empty_password",
+    "payload": {"username": "alice", "password": ""},
+    "expected_status": 422,
+    "expect_success": false,
+    "msg_fragment": null
+  },
+  {
+    "case_id": "both_empty",
+    "payload": {"username": "", "password": ""},
+    "expected_status": 422,
+    "expect_success": false,
+    "msg_fragment": null
+  },
+  {
+    "case_id": "username_with_spaces",
+    "payload": {"username": "  alice  ", "password": "password123"},
+    "expected_status": 200,
+    "expect_success": true,
+    "msg_fragment": "Login successful"
+  },
+  {
+    "case_id": "case_sensitive_password",
+    "payload": {"username": "alice", "password": "Password123"},
+    "expected_status": 401,
+    "expect_success": false,
+    "msg_fragment": "Invalid username or password"
+  },
+  {
+    "case_id": "sql_injection_username",
+    "payload": {"username": "admin' OR '1'='1", "password": "x"},
+    "expected_status": 401,
+    "expect_success": false,
+    "msg_fragment": "Invalid username or password"
+  },
+  {
+    "case_id": "xss_username",
+    "payload": {"username": "<script>alert(1)</script>", "password": "x"},
+    "expected_status": 401,
+    "expect_success": false,
+    "msg_fragment": "Invalid username or password"
+  },
+  {
+    "case_id": "very_long_username",
+    "payload": {"username": {"__repeat__": {"char": "a", "count": 256}}, "password": "password123"},
+    "expected_status": 401,
+    "expect_success": false,
+    "msg_fragment": "Invalid username or password"
+  },
+  {
+    "case_id": "very_long_password",
+    "payload": {"username": "alice", "password": {"__repeat__": {"char": "p", "count": 256}}},
+    "expected_status": 401,
+    "expect_success": false,
+    "msg_fragment": "Invalid username or password"
+  },
+  {
+    "case_id": "numeric_username",
+    "payload": {"username": "12345", "password": "password123"},
+    "expected_status": 401,
+    "expect_success": false,
+    "msg_fragment": "Invalid username or password"
+  },
+  {
+    "case_id": "special_chars_password",
+    "payload": {"username": "alice", "password": "!@#$%^&*()"},
+    "expected_status": 401,
+    "expect_success": false,
+    "msg_fragment": "Invalid username or password"
+  },
+  {
+    "case_id": "missing_username",
+    "payload": {"password": "password123"},
+    "expected_status": 422,
+    "expect_success": false,
+    "msg_fragment": null
+  },
+  {
+    "case_id": "missing_password",
+    "payload": {"username": "alice"},
+    "expected_status": 422,
+    "expect_success": false,
+    "msg_fragment": null
+  },
+  {
+    "case_id": "null_body",
+    "payload": null,
+    "expected_status": 422,
+    "expect_success": false,
+    "msg_fragment": null
+  },
+  {
+    "case_id": "extra_fields",
+    "payload": {"username": "alice", "password": "password123", "role": "admin"},
+    "expected_status": 200,
+    "expect_success": true,
+    "msg_fragment": "Login successful"
+  },
+  {
+    "case_id": "unicode_username",
+    "payload": {"username": "用户", "password": "password123"},
+    "expected_status": 401,
+    "expect_success": false,
+    "msg_fragment": "Invalid username or password"
+  },
+  {
+    "case_id": "whitespace_password",
+    "payload": {"username": "alice", "password": "   "},
+    "expected_status": 400,
+    "expect_success": false,
+    "msg_fragment": "Password is required"
+  }
+]

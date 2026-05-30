@@ -1,0 +1,62 @@
+[
+  {
+    "case_id": "add_cart_invalid_quantity_zero",
+    "steps": [{"action": "add_cart", "product_id": 1, "quantity": 0}],
+    "expected_status": 422
+  },
+  {
+    "case_id": "add_cart_invalid_quantity_negative",
+    "steps": [{"action": "add_cart", "product_id": 1, "quantity": -1}],
+    "expected_status": 422
+  },
+  {
+    "case_id": "cart_merge_same_product",
+    "steps": [
+      {"action": "add_cart", "product_id": 8, "quantity": 1},
+      {"action": "add_cart", "product_id": 8, "quantity": 2},
+      {"action": "get_cart"}
+    ],
+    "assertions": [
+      {"type": "cart_items_count", "equals": 1},
+      {"type": "cart_item_quantity", "product_id": 8, "equals": 3}
+    ]
+  },
+  {
+    "case_id": "insufficient_stock_on_order",
+    "steps": [
+      {"action": "set_stock", "product_id": 8, "stock": 1},
+      {"action": "add_cart", "product_id": 8, "quantity": 5},
+      {"action": "create_order"}
+    ],
+    "expected_status": 400,
+    "expected_error_code": "INSUFFICIENT_STOCK",
+    "restore_stock": true
+  },
+  {
+    "case_id": "duplicate_submit_empty_cart",
+    "steps": [
+      {"action": "add_cart", "product_id": 7, "quantity": 1},
+      {"action": "create_order"},
+      {"action": "create_order"}
+    ],
+    "expected_status": 400,
+    "expected_error_code": "EMPTY_CART"
+  },
+  {
+    "case_id": "create_order_empty_cart_bob",
+    "use_login": {"username": "bob", "password": "password456"},
+    "steps": [{"action": "create_order"}],
+    "expected_status": 400,
+    "expected_error_code": "EMPTY_CART"
+  },
+  {
+    "case_id": "discount_calculation",
+    "steps": [
+      {"action": "add_cart", "product_id": 1, "quantity": 1},
+      {"action": "create_order", "save_as": "order"}
+    ],
+    "assertions": [
+      {"type": "order_discount", "subtotal": 7999.0, "rate": 0.1}
+    ]
+  }
+]

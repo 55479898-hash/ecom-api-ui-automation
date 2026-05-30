@@ -1,0 +1,12 @@
+[
+  {
+    "case_id": "no_token",
+    "headers": {},
+    "expected_status": 401
+  },
+  {
+    "case_id": "bad_token",
+    "headers": {"Authorization": "Bearer bad"},
+    "expected_status": 401
+  }
+]

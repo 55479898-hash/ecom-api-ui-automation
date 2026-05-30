@@ -1,0 +1,50 @@
+[
+  {
+    "case_id": "search_by_keyword",
+    "requires_login": true,
+    "actions": [
+      {"type": "fill", "test_id": "search-input", "value": "iPhone"},
+      {"type": "click", "test_id": "filter-btn"},
+      {"type": "wait_products"}
+    ],
+    "expect_text": {
+      "product-count": "共 1 件商品",
+      "product-name-1": "iPhone"
+    }
+  },
+  {
+    "case_id": "filter_by_category",
+    "requires_login": true,
+    "actions": [
+      {"type": "select", "test_id": "category-filter", "value": "books"},
+      {"type": "click", "test_id": "filter-btn"},
+      {"type": "wait_products"}
+    ],
+    "expect_count": {"selector": "[data-testid^='product-card-']", "equals": 2},
+    "expect_text": {"product-category-7": "books"}
+  },
+  {
+    "case_id": "filter_by_price_range",
+    "requires_login": true,
+    "actions": [
+      {"type": "fill", "test_id": "min-price-input", "value": "500"},
+      {"type": "fill", "test_id": "max-price-input", "value": "2000"},
+      {"type": "click", "test_id": "filter-btn"},
+      {"type": "wait_products"}
+    ],
+    "expect_min_count": {"selector": "[data-testid^='product-card-']", "min": 1}
+  },
+  {
+    "case_id": "reset_filters",
+    "requires_login": true,
+    "actions": [
+      {"type": "fill", "test_id": "search-input", "value": "nonexistent"},
+      {"type": "click", "test_id": "filter-btn"},
+      {"type": "wait_products"},
+      {"type": "expect_visible", "test_id": "no-products-msg"},
+      {"type": "click", "test_id": "reset-filter-btn"},
+      {"type": "wait_products"}
+    ],
+    "expect_text": {"product-count": "共 10 件商品"}
+  }
+]
