@@ -6,9 +6,8 @@ from ui.conftest import wait_for_orders_loaded, wait_for_products_loaded
 
 
 def _login(page: Page, base_url: str, username: str, password: str) -> None:
-    page.goto(f"{base_url}/login", wait_until="domcontentloaded", timeout=60000)
-    expect(page.get_by_test_id("login-title")).to_be_visible(timeout=30000)
-    expect(page.get_by_test_id("username-input")).to_be_visible(timeout=30000)
+    page.goto(f"{base_url}/login", wait_until="domcontentloaded")
+    page.get_by_test_id("username-input").wait_for(state="visible", timeout=15000)
     page.get_by_test_id("username-input").fill(username)
     page.get_by_test_id("password-input").fill(password)
     page.get_by_test_id("login-submit-btn").click()
@@ -40,11 +39,10 @@ def execute_ui_case(page: Page, base_url: str, case: dict) -> None:
     flow = case.get("flow")
 
     if flow == "login":
-        page.goto(f"{base_url}/login", wait_until="domcontentloaded", timeout=60000)
-        expect(page.get_by_test_id("login-title")).to_be_visible(timeout=30000)
+        page.goto(f"{base_url}/login", wait_until="domcontentloaded")
         if case_id == "login_success":
             expect(page.get_by_test_id("login-title")).to_be_visible()
-        expect(page.get_by_test_id("username-input")).to_be_visible(timeout=30000)
+        page.get_by_test_id("username-input").wait_for(state="visible", timeout=15000)
         page.get_by_test_id("username-input").fill(case["username"])
         page.get_by_test_id("password-input").fill(case["password"])
         page.get_by_test_id("login-submit-btn").click()

@@ -27,9 +27,7 @@ def _is_server_ready() -> bool:
     import requests
 
     try:
-        products_ok = requests.get(f"{BASE_URL}/api/products", timeout=3).status_code == 200
-        login_ok = requests.get(f"{BASE_URL}/login", timeout=3).status_code == 200
-        return products_ok and login_ok
+        return requests.get(f"{BASE_URL}/api/products", timeout=2).status_code == 200
     except Exception:
         return False
 
@@ -47,14 +45,12 @@ def _start_server():
         [sys.executable, "-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000"],
         **kwargs,
     )
-    # CI runners can be slow; allow up to ~30s for uvicorn + DB init.
-    attempts = 60 if os.environ.get("GITHUB_ACTIONS") else 30
-    for _ in range(attempts):
+    for _ in range(20):
         if _is_server_ready():
             return _server_proc
-        time.sleep(0.5)
+        time.sleep(0.3)
     _server_proc.kill()
-    raise RuntimeError(f"Server failed to start within {attempts * 0.5:.0f} seconds.")
+    raise RuntimeError("Server failed to start within 6 seconds.")
 
 
 def _stop_server(proc):

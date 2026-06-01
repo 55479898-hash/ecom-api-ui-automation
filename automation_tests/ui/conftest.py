@@ -23,7 +23,8 @@ def unique_user():
 @pytest.fixture
 def logged_in_page(page: Page, base_url):
     """Pre-authenticated page using the shared test account."""
-    page.goto(f"{base_url}/login")
+    page.goto(f"{base_url}/login", wait_until="domcontentloaded")
+    page.get_by_test_id("username-input").wait_for(state="visible", timeout=15000)
     page.get_by_test_id("username-input").fill("alice")
     page.get_by_test_id("password-input").fill("password123")
     page.get_by_test_id("login-submit-btn").click()
@@ -60,7 +61,7 @@ def wait_for_orders_loaded(page: Page):
 
 
 @pytest.fixture(autouse=True)
-def isolate_alice_cart(db_helper, start_server):
+def isolate_alice_cart(db_helper):
     """Avoid cart pollution when multiple UI cases reuse alice."""
     db_helper.clear_cart(ALICE_USER_ID)
     yield
