@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}首页 - 电商演示系统{% endblock %}
+{% block content %}
+<section class="hero" data-testid="hero-section">
+  <h1 data-testid="hero-title">欢迎来到 EcomDemo 电商系统</h1>
+  <p>支持用户登录、商品搜索筛选、购物车与订单管理</p>
+  <div class="hero-actions">
+    <a href="/products" class="btn btn-primary" data-testid="hero-browse-btn">浏览商品</a>
+    <a href="/login" class="btn btn-secondary" data-testid="hero-login-btn">立即登录</a>
+  </div>
+</section>
+<section class="features">
+  <div class="feature-card" data-testid="feature-auth">
+    <h3>用户认证</h3>
+    <p>安全的登录与 Token 鉴权</p>
+  </div>
+  <div class="feature-card" data-testid="feature-products">
+    <h3>商品管理</h3>
+    <p>关键词搜索与分类/价格筛选</p>
+  </div>
+  <div class="feature-card" data-testid="feature-cart">
+    <h3>购物车</h3>
+    <p>添加商品、查看购物车</p>
+  </div>
+  <div class="feature-card" data-testid="feature-orders">
+    <h3>订单管理</h3>
+    <p>下单与订单查询</p>
+  </div>
+</section>
+{% endblock %}

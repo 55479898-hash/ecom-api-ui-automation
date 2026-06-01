@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}商品 - 电商演示系统{% endblock %}
+{% block content %}
+<section data-testid="products-section">
+  <h2 data-testid="products-title">商品列表</h2>
+  <div class="filters" data-testid="product-filters">
+    <input type="text" id="search-input" data-testid="search-input" placeholder="搜索商品名称...">
+    <select id="category-filter" data-testid="category-filter">
+      <option value="">全部分类</option>
+      <option value="electronics">electronics</option>
+      <option value="clothing">clothing</option>
+      <option value="books">books</option>
+      <option value="home">home</option>
+    </select>
+    <input type="number" id="min-price" data-testid="min-price-input" placeholder="最低价" min="0">
+    <input type="number" id="max-price" data-testid="max-price-input" placeholder="最高价" min="0">
+    <button id="filter-btn" class="btn btn-primary" data-testid="filter-btn">筛选</button>
+    <button id="reset-btn" class="btn btn-secondary" data-testid="reset-filter-btn">重置</button>
+  </div>
+  <p id="product-count" data-testid="product-count" class="count-label"></p>
+  <div id="product-list" class="product-grid" data-testid="product-list"></div>
+  <p id="no-products" class="empty-msg hidden" data-testid="no-products-msg">没有找到符合条件的商品</p>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadProducts() {
+  const q = document.getElementById('search-input').value.trim();
+  const category = document.getElementById('category-filter').value;
+  const minPrice = document.getElementById('min-price').value;
+  const maxPrice = document.getElementById('max-price').value;
+
+  const params = new URLSearchParams();
+  if (q) params.set('q', q);
+  if (category) params.set('category', category);
+  if (minPrice) params.set('min_price', minPrice);
+  if (maxPrice) params.set('max_price', maxPrice);
+
+  const res = await fetch('/api/products?' + params.toString());
+  const products = await res.json();
+  const list = document.getElementById('product-list');
+  const noProducts = document.getElementById('no-products');
+  list.innerHTML = '';
+
+  document.getElementById('product-count').textContent = `共 ${products.length} 件商品`;
+
+  if (products.length === 0) {
+    noProducts.classList.remove('hidden');
+    return;
+  }
+  noProducts.classList.add('hidden');
+
+  products.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.setAttribute('data-testid', `product-card-${p.id}`);
+    card.innerHTML = `
+      <h3 data-testid="product-name-${p.id}">${p.name}</h3>
+      <span class="category-tag" data-testid="product-category-${p.id}">${p.category}</span>
+      <p class="price" data-testid="product-price-${p.id}">¥${p.price.toFixed(2)}</p>
+      <p class="stock" data-testid="product-stock-${p.id}">库存: ${p.stock}</p>
+      <p class="desc">${p.description}</p>
+      <button class="btn btn-primary add-cart-btn" data-testid="add-cart-btn-${p.id}" data-product-id="${p.id}">加入购物车</button>
+    `;
+    list.appendChild(card);
+  });
+
+  document.querySelectorAll('.add-cart-btn').forEach(btn => {
+    btn.addEventListener('click', () => addToCart(btn.dataset.productId));
+  });
+}
+
+async function addToCart(productId) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    showToast('请先登录');
+    window.location.href = '/login';
+    return;
+  }
+  const res = await fetch('/api/cart/items', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ product_id: parseInt(productId), quantity: 1 }),
+  });
+  const data = await res.json();
+  if (data.success) {
+    showToast('已加入购物车');
+    updateCartBadge();
+  } else {
+    showToast(data.message || '添加失败');
+  }
+}
+
+document.getElementById('filter-btn').addEventListener('click', loadProducts);
+document.getElementById('reset-btn').addEventListener('click', () => {
+  document.getElementById('search-input').value = '';
+  document.getElementById('category-filter').value = '';
+  document.getElementById('min-price').value = '';
+  document.getElementById('max-price').value = '';
+  loadProducts();
+});
+
+loadProducts();
+</script>
+{% endblock %}

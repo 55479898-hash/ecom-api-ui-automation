@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}登录 - 电商演示系统{% endblock %}
+{% block content %}
+<section class="auth-card" data-testid="login-section">
+  <h2 data-testid="login-title">用户登录</h2>
+  <form id="login-form" data-testid="login-form">
+    <div class="form-group">
+      <label for="username">用户名</label>
+      <input type="text" id="username" name="username" data-testid="username-input" placeholder="alice / bob / testuser" required>
+    </div>
+    <div class="form-group">
+      <label for="password">密码</label>
+      <input type="password" id="password" name="password" data-testid="password-input" placeholder="password123" required>
+    </div>
+    <p id="login-error" class="error-msg hidden" data-testid="login-error"></p>
+    <button type="submit" class="btn btn-primary btn-block" data-testid="login-submit-btn">登录</button>
+  </form>
+  <p class="hint">测试账号: alice / password123</p>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const errorEl = document.getElementById('login-error');
+  errorEl.classList.add('hidden');
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('username', data.username);
+      showToast('登录成功');
+      window.location.href = '/products';
+    } else {
+      errorEl.textContent = data.message || '登录失败';
+      errorEl.classList.remove('hidden');
+    }
+  } catch (err) {
+    errorEl.textContent = '网络错误，请重试';
+    errorEl.classList.remove('hidden');
+  }
+});
+</script>
+{% endblock %}

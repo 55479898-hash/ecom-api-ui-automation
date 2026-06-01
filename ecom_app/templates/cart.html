@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}购物车 - 电商演示系统{% endblock %}
+{% block content %}
+<section data-testid="cart-section">
+  <h2 data-testid="cart-title">我的购物车</h2>
+  <div id="cart-items" data-testid="cart-items"></div>
+  <p id="empty-cart" class="empty-msg hidden" data-testid="empty-cart-msg">购物车为空</p>
+  <div class="cart-actions hidden" id="cart-actions" data-testid="cart-actions">
+    <p class="total" data-testid="cart-total">合计: ¥<span id="total-amount">0.00</span></p>
+    <button id="checkout-btn" class="btn btn-primary" data-testid="checkout-btn">提交订单</button>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadCart() {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    window.location.href = '/login';
+    return;
+  }
+  const res = await fetch('/api/cart', {
+    headers: { 'Authorization': 'Bearer ' + token },
+  });
+  const data = await res.json();
+  const container = document.getElementById('cart-items');
+  const emptyMsg = document.getElementById('empty-cart');
+  const actions = document.getElementById('cart-actions');
+  container.innerHTML = '';
+
+  if (!data.items || data.items.length === 0) {
+    emptyMsg.classList.remove('hidden');
+    actions.classList.add('hidden');
+    return;
+  }
+  emptyMsg.classList.add('hidden');
+  actions.classList.remove('hidden');
+
+  let total = 0;
+  data.items.forEach(item => {
+    const subtotal = item.price * item.quantity;
+    total += subtotal;
+    const row = document.createElement('div');
+    row.className = 'cart-item';
+    row.setAttribute('data-testid', `cart-item-${item.product_id}`);
+    row.innerHTML = `
+      <span data-testid="cart-item-name-${item.product_id}">${item.name}</span>
+      <span data-testid="cart-item-qty-${item.product_id}">x${item.quantity}</span>
+      <span data-testid="cart-item-price-${item.product_id}">¥${subtotal.toFixed(2)}</span>
+    `;
+    container.appendChild(row);
+  });
+  document.getElementById('total-amount').textContent = total.toFixed(2);
+}
+
+document.getElementById('checkout-btn').addEventListener('click', async () => {
+  const token = localStorage.getItem('token');
+  const res = await fetch('/api/orders', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token },
+  });
+  const data = await res.json();
+  if (data.success && data.order) {
+    const payRes = await fetch('/api/payments/callback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        order_id: data.order.id,
+        payment_status: 'success',
+        transaction_id: 'ui_txn_' + Date.now(),
+      }),
+    });
+    const payData = await payRes.json();
+    if (payData.success) {
+      showToast('订单提交成功！');
+      setTimeout(() => window.location.href = '/orders', 1000);
+    } else {
+      showToast(payData.message || '支付失败');
+    }
+  } else {
+    showToast(data.message || '下单失败');
+  }
+});
+
+loadCart();
+</script>
+{% endblock %}

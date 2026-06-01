@@ -1,5 +1,5 @@
 reports/
-*.html
+automation_tests/reports/
 __pycache__/
 *.pyc
 *.db

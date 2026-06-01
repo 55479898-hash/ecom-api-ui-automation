@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}订单 - 电商演示系统{% endblock %}
+{% block content %}
+<section data-testid="orders-section">
+  <h2 data-testid="orders-title">我的订单</h2>
+  <div id="order-list" data-testid="order-list"></div>
+  <p id="no-orders" class="empty-msg hidden" data-testid="no-orders-msg">暂无订单</p>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadOrders() {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    window.location.href = '/login';
+    return;
+  }
+  const res = await fetch('/api/orders', {
+    headers: { 'Authorization': 'Bearer ' + token },
+  });
+  const orders = await res.json();
+  const list = document.getElementById('order-list');
+  const noOrders = document.getElementById('no-orders');
+  list.innerHTML = '';
+
+  if (!orders || orders.length === 0) {
+    noOrders.classList.remove('hidden');
+    return;
+  }
+  noOrders.classList.add('hidden');
+
+  orders.forEach(order => {
+    const card = document.createElement('div');
+    card.className = 'order-card';
+    card.setAttribute('data-testid', `order-card-${order.id}`);
+    const itemsHtml = order.items.map(i =>
+      `<li data-testid="order-item-${order.id}-${i.product_id}">${i.product_name} x${i.quantity} ¥${(i.unit_price * i.quantity).toFixed(2)}</li>`
+    ).join('');
+    card.innerHTML = `
+      <div class="order-header">
+        <span data-testid="order-id-${order.id}">订单 #${order.id}</span>
+        <span class="status" data-testid="order-status-${order.id}">${order.status}</span>
+      </div>
+      <p data-testid="order-total-${order.id}">合计: ¥${order.total_amount.toFixed(2)}</p>
+      <p data-testid="order-date-${order.id}">${order.created_at}</p>
+      <ul>${itemsHtml}</ul>
+    `;
+    list.appendChild(card);
+  });
+}
+
+loadOrders();
+</script>
+{% endblock %}
