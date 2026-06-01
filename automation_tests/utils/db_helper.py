@@ -60,6 +60,14 @@ class DbHelper:
         )
         return row["cnt"] if row else 0
 
+    def clear_cart(self, user_id: int) -> None:
+        if self.db_type == "mysql":
+            raise NotImplementedError("clear_cart for mysql in demo env")
+        conn = sqlite3.connect(self._sqlite_path())
+        conn.execute("DELETE FROM cart_items WHERE user_id = ?", (user_id,))
+        conn.commit()
+        conn.close()
+
     def set_product_stock(self, product_id: int, stock: int) -> None:
         if self.db_type == "mysql":
             raise NotImplementedError("set_product_stock for mysql in demo env")

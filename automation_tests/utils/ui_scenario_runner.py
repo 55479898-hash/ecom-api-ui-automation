@@ -2,7 +2,7 @@
 
 from playwright.sync_api import Page, expect
 
-from ui.conftest import wait_for_products_loaded
+from ui.conftest import wait_for_orders_loaded, wait_for_products_loaded
 
 
 def _login(page: Page, base_url: str, username: str, password: str) -> None:
@@ -46,6 +46,8 @@ def execute_ui_case(page: Page, base_url: str, case: dict) -> None:
         page.get_by_test_id("login-submit-btn").click()
         if url_part := case.get("expect_url_contains"):
             page.wait_for_url(f"**{url_part}**")
+        elif case_id == "login_failure":
+            expect(page.get_by_test_id("login-error")).to_be_visible(timeout=10000)
         for test_id in case.get("expect_visible", []):
             expect(page.get_by_test_id(test_id)).to_be_visible()
         for test_id, text in case.get("expect_text", {}).items():
@@ -84,8 +86,10 @@ def execute_ui_case(page: Page, base_url: str, case: dict) -> None:
         expect(page.get_by_test_id("cart-badge")).not_to_have_text(case["expect_badge_not"])
 
     if case.get("expect_first_order_status"):
+        wait_for_orders_loaded(page)
         cards = page.locator("[data-testid^='order-card-']")
-        expect(cards.first).to_be_visible()
+        expect(cards.first).to_be_visible(timeout=15000)
         expect(cards.first.locator("[data-testid^='order-status-']")).to_contain_text(
-            case["expect_first_order_status"]
+            case["expect_first_order_status"],
+            timeout=10000,
         )

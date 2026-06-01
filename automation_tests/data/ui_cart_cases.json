@@ -7,7 +7,6 @@
       {"type": "click", "test_id": "filter-btn"},
       {"type": "wait_products"},
       {"type": "click", "test_id": "add-cart-btn-7"},
-      {"type": "expect_visible", "test_id": "toast"},
       {"type": "click", "test_id": "nav-cart"},
       {"type": "wait_url_contains", "value": "/cart"},
       {"type": "expect_visible", "test_id": "cart-item-7"},

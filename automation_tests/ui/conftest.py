@@ -7,6 +7,7 @@ import pytest
 from playwright.sync_api import Page, expect
 
 BASE_URL = os.environ.get("ECOM_BASE_URL", "http://127.0.0.1:8000")
+ALICE_USER_ID = 1
 
 
 @pytest.fixture
@@ -41,3 +42,26 @@ def wait_for_products_loaded(page: Page):
         }""",
         timeout=10000,
     )
+
+
+def wait_for_orders_loaded(page: Page):
+    """Wait for order list API render to finish."""
+    page.wait_for_selector("[data-testid='order-list']", state="attached")
+    page.wait_for_function(
+        """() => {
+            const list = document.getElementById('order-list');
+            const empty = document.getElementById('no-orders');
+            if (!list) return false;
+            if (list.children.length > 0) return true;
+            return empty && !empty.classList.contains('hidden');
+        }""",
+        timeout=15000,
+    )
+
+
+@pytest.fixture(autouse=True)
+def isolate_alice_cart(db_helper):
+    """Avoid cart pollution when multiple UI cases reuse alice."""
+    db_helper.clear_cart(ALICE_USER_ID)
+    yield
+    db_helper.clear_cart(ALICE_USER_ID)
