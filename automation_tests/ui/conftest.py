@@ -60,7 +60,7 @@ def wait_for_orders_loaded(page: Page):
 
 
 @pytest.fixture(autouse=True)
-def isolate_alice_cart(db_helper):
+def isolate_alice_cart(db_helper, start_server):
     """Avoid cart pollution when multiple UI cases reuse alice."""
     db_helper.clear_cart(ALICE_USER_ID)
     yield

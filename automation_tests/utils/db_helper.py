@@ -63,10 +63,18 @@ class DbHelper:
     def clear_cart(self, user_id: int) -> None:
         if self.db_type == "mysql":
             raise NotImplementedError("clear_cart for mysql in demo env")
-        conn = sqlite3.connect(self._sqlite_path())
-        conn.execute("DELETE FROM cart_items WHERE user_id = ?", (user_id,))
-        conn.commit()
-        conn.close()
+        db_path = self._sqlite_path()
+        if not db_path.exists():
+            return
+        conn = sqlite3.connect(db_path)
+        try:
+            conn.execute("DELETE FROM cart_items WHERE user_id = ?", (user_id,))
+            conn.commit()
+        except sqlite3.OperationalError:
+            # DB not initialized yet (tables missing) — safe to ignore.
+            pass
+        finally:
+            conn.close()
 
     def set_product_stock(self, product_id: int, stock: int) -> None:
         if self.db_type == "mysql":
