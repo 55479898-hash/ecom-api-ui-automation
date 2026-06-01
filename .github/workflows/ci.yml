@@ -28,24 +28,19 @@ jobs:
           pip install -r ecom_app/requirements.txt
           pip install -r automation_tests/requirements.txt
 
-      - name: Start ecom server
-        working-directory: ecom_app
-        env:
-          PYTHONPATH: ${{ github.workspace }}/ecom_app
-        run: |
-          python -m uvicorn main:app --host 127.0.0.1 --port 8000 &
-          for i in $(seq 1 60); do
-            curl -fsS http://127.0.0.1:8000/api/products >/dev/null && exit 0
-            sleep 0.5
-          done
-          echo "Server failed to start"
-          exit 1
-
       - name: Run API tests
-        working-directory: automation_tests
         env:
           ECOM_BASE_URL: http://127.0.0.1:8000
+          PYTHONPATH: ${{ github.workspace }}/ecom_app
         run: |
+          cd ecom_app
+          nohup python -m uvicorn main:app --host 127.0.0.1 --port 8000 > /tmp/ecom-server.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:8000/api/products >/dev/null && break
+            sleep 0.5
+          done
+          curl -fsS http://127.0.0.1:8000/api/products >/dev/null || { cat /tmp/ecom-server.log; exit 1; }
+          cd "${{ github.workspace }}/automation_tests"
           mkdir -p reports/allure-results
           pytest api/ -m api
 
@@ -82,24 +77,20 @@ jobs:
       - name: Wait for toolchain
         run: python --version
 
-      - name: Start ecom server
-        working-directory: ecom_app
-        env:
-          PYTHONPATH: ${{ github.workspace }}/ecom_app
-        run: |
-          python -m uvicorn main:app --host 127.0.0.1 --port 8000 &
-          for i in $(seq 1 60); do
-            curl -fsS http://127.0.0.1:8000/api/products >/dev/null && exit 0
-            sleep 0.5
-          done
-          echo "Server failed to start"
-          exit 1
-
       - name: Run UI tests
         env:
           ECOM_BASE_URL: http://127.0.0.1:8000
-        working-directory: automation_tests
+          PYTHONPATH: ${{ github.workspace }}/ecom_app
         run: |
+          cd ecom_app
+          nohup python -m uvicorn main:app --host 127.0.0.1 --port 8000 > /tmp/ecom-server.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:8000/api/products >/dev/null \
+              && curl -fsS http://127.0.0.1:8000/login >/dev/null && break
+            sleep 0.5
+          done
+          curl -fsS http://127.0.0.1:8000/login >/dev/null || { cat /tmp/ecom-server.log; exit 1; }
+          cd "${{ github.workspace }}/automation_tests"
           mkdir -p reports/allure-results
           pytest ui/ -m ui
 
